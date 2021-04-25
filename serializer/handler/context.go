@@ -2,12 +2,12 @@ package handler
 
 import (
 	"net/http"
+	"singo/model"
 	"singo/util"
 	"strconv"
 	"strings"
-	
+
 	"github.com/gin-gonic/gin"
-	
 )
 
 // pageSize limit value and default value
@@ -19,18 +19,16 @@ const (
 // split limit and default value
 const (
 	MaxParamSplitLength = 100
-	
+
 	DefaultSplitSep = ","
 )
 
 // Context request context
 type Context struct {
-	 *gin.Context
+	*gin.Context
+
+	User *model.User
 }
-
-
-
-
 
 // UserAgent returns the "User-Agent" header
 func (ctx *Context) UserAgent() string {
@@ -94,7 +92,6 @@ func (ctx *Context) GetDefaultParamInt(key string, defaultValue int) (int, error
 	return value, err
 }
 
-
 // GetDefaultParamInt64 gets params from query if successful, otherwise post form, otherwise defaultValue
 func (ctx *Context) GetDefaultParamInt64(key string, defaultValue int64) (int64, error) {
 	val, ok := ctx.GetParam(key)
@@ -122,7 +119,7 @@ func (ctx *Context) GetParamInt64ArrayFromString(key string, sep ...string) ([]i
 	if !ok {
 		return nil, ErrEmptyParam
 	}
-	
+
 	splitSep := DefaultSplitSep
 	if len(sep) == 1 {
 		splitSep = sep[0]
@@ -139,8 +136,6 @@ func (ctx *Context) GetParamInt64ArrayFromString(key string, sep ...string) ([]i
 	}
 	return value, nil
 }
-
-
 
 // PageOption param page option
 type PageOption struct {

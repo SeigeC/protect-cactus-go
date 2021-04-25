@@ -9,12 +9,15 @@ type User struct {
 	ID        int64  `json:"id"`
 	UserName  string `json:"user_name"`
 	Nickname  string `json:"nickname"`
+	AppKey    string `json:"app_key"`
 	Status    string `json:"status"`
 	Avatar    string `gorm:"size:1000" json:"avatar"`
 	CreatedAt int64  `json:"created_at"`
 	
 	PasswordDigest string
 }
+
+
 
 const (
 	// PassWordCost 密码加密难度

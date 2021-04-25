@@ -2,19 +2,19 @@ package handler
 
 import (
 	"errors"
-	"github.com/gin-gonic/gin"
 	"net/http"
+
+	"github.com/gin-gonic/gin"
 )
 
 const (
-	CodeSuccess           = 0
-	CodeLoginRequired     = 100010006
-	CodeUnknownError      = 100010007
-	
+	CodeSuccess       = 0
+	CodeLoginRequired = 100010006
+	CodeUnknownError  = 100010007
+
 	CodeEmptyParam   = 201010001
 	CodeInvalidParam = 201010002
 )
-
 
 // errors
 var (
@@ -22,7 +22,7 @@ var (
 	ErrBadRequest    = NewActionError(http.StatusBadRequest, CodeUnknownError, "错误的请求")
 	ErrEmptyParam    = NewActionError(http.StatusBadRequest, CodeEmptyParam, "参数不可为空")
 	ErrInvalidParam  = NewActionError(http.StatusBadRequest, CodeInvalidParam, "参数不合法")
-	
+
 	ErrEmptyValue = errors.New("empty value")
 )
 
@@ -36,7 +36,7 @@ type ResponseError interface {
 	ErrorInfo() interface{}
 	// ErrorMessage 响应错误报错
 	ErrorMessage() string
-	
+
 	error
 }
 
@@ -46,7 +46,7 @@ type ActionError struct {
 	Code    int
 	Message string
 	Info    string
-	
+
 	err error
 }
 
@@ -61,8 +61,8 @@ func NewActionError(status int, code int, msg string) *ActionError {
 
 // New set error
 func (e *ActionError) New(err error) *ActionError {
-	 e.err = err
-	 return e
+	e.err = err
+	return e
 }
 
 // StatusCode status code
@@ -87,7 +87,7 @@ func (e *ActionError) ErrorInfo() interface{} {
 // ErrorInfo response info
 // returns {"msg":"test err", e.Info...}
 func (e *ActionError) ErrorMessage() string {
-	if e.err!=nil&& gin.Mode() != gin.ReleaseMode {
+	if e.err != nil && gin.Mode() != gin.ReleaseMode {
 		return e.err.Error()
 	}
 	return ""
@@ -102,7 +102,7 @@ type Action struct {
 	Method        Method
 	Action        ActionFunc
 	LoginRequired bool
-	
+
 	handler gin.HandlerFunc
 }
 
@@ -116,18 +116,18 @@ func NewAction(method Method, handler ActionFunc, loginRequired bool) *Action {
 	a := Action{Method: method, Action: handler, LoginRequired: loginRequired}
 	a.handler = func(c *gin.Context) {
 		// init context
-		ctx := Context{c}
-		
+		ctx := Context{Context: c}
+
 		if a.LoginRequired {
 			abortError(c, ErrLoginRequired)
 			return
 		}
-		
+
 		r, err := a.Action(&ctx)
 		if err != nil {
 			abortError(c, err)
 			return
-			
+
 		}
 		c.JSON(http.StatusOK, Response{Code: CodeSuccess, Data: r})
 	}
@@ -138,13 +138,13 @@ func abortError(c *gin.Context, err error) {
 	switch v := err.(type) {
 	case ResponseError:
 		c.Status(v.StatusCode())
-		abortWithError(c, v.StatusCode(), v.ErrorCode(), v.ErrorInfo(),v.Error())
+		abortWithError(c, v.StatusCode(), v.ErrorCode(), v.ErrorInfo(), v.Error())
 	default:
 		c.Status(http.StatusInternalServerError)
-		abortWithError(c, http.StatusInternalServerError, 500, err.Error(),"")
+		abortWithError(c, http.StatusInternalServerError, 500, err.Error(), "")
 	}
 }
 
-func abortWithError(c *gin.Context, status, code int, info interface{},err string) {
-	c.AbortWithStatusJSON(status, Response{Code: code, Data: info,Error:err})
+func abortWithError(c *gin.Context, status, code int, info interface{}, err string) {
+	c.AbortWithStatusJSON(status, Response{Code: code, Data: info, Error: err})
 }
